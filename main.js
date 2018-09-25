@@ -72,10 +72,9 @@ function setup() {
 
     select("#next").mouseReleased((_) => state.reset());
 
-    // mapImage.resize(0, mapImage.height / 5);
-    controls.view.zoom = 0.1;
+    controls.view.zoom = 0.15;
     controls.view.x = canvas.width / 2 - (mapImage.width * controls.view.zoom) / 2;
-    controls.view.y = canvas.height / 2- (mapImage.height * controls.view.zoom) / 2;
+    controls.view.y = canvas.height / 2 - (mapImage.height * controls.view.zoom) / 2;
 }
 
 function windowResized() {
@@ -116,17 +115,6 @@ function draw() {
         }
     }
 
-    if (state.mark) {
-        let screenPos = getPositionOnScreen(state.mark.x, state.mark.y);
-
-        fill("green");
-        strokeWeight(2);
-        stroke("black");
-        line(state.mark.x - 10, state.mark.y - 10, state.mark.x + 10, state.mark.y + 10);
-        line(state.mark.x - 10, state.mark.y + 10, state.mark.x + 10, state.mark.y - 10);
-        // ellipse(state.mark.x, state.mark.y, 10);
-    }
-
     if (state.reveal) {
         let screenPos = getPositionOnScreen(cities[state.cityIndex].wgs84.x, cities[state.cityIndex].wgs84.y);
 
@@ -143,26 +131,41 @@ function draw() {
             drawLabel(cities[state.cityIndex].hebrewName, screenPos, "left");
         }
 
+        const distanceText = nfc(distance / distanceScale, 1) + "km";
+
+        // Ensure distance label doesn't overlap with city name label
         if (state.distance > 150) {
             push();
             translate((state.reveal.x + screenPos.x) / 2, (state.reveal.y + screenPos.y) / 2);
 
+            // Ensure distance label is always placed on top of distance line
             if (state.reveal.x > screenPos.x) {
                 rotate(atan2(state.reveal.y - screenPos.y, state.reveal.x - screenPos.x));
             } else {
                 rotate(atan2(screenPos.y - state.reveal.y, screenPos.x - state.reveal.x));
             }
 
-            text(nfc(distance / distanceScale, 1) + "km", 0, -5);
+            text(distanceText, 0, -5);
             pop();
         } else {
             const distanceLabelPos = createVector(screenPos.x, screenPos.y + 50);
             if (state.reveal.x < screenPos.x) {
-                drawLabel(nfc(distance / distanceScale, 1) + "km", distanceLabelPos, "right", false);
+                drawLabel(distanceText, distanceLabelPos, "right", false, false);
             } else {
-                drawLabel(nfc(distance / distanceScale, 1) + "km", distanceLabelPos, "left", false);
+                drawLabel(distanceText, distanceLabelPos, "left", false, false);
             }
         }
+    }
+
+    if (state.mark) {
+        let screenPos = getPositionOnScreen(state.mark.x, state.mark.y);
+
+        fill("green");
+        strokeWeight(5);
+        stroke("green");
+        line(state.mark.x - 10, state.mark.y - 10, state.mark.x + 10, state.mark.y + 10);
+        line(state.mark.x - 10, state.mark.y + 10, state.mark.x + 10, state.mark.y - 10);
+        // ellipse(state.mark.x, state.mark.y, 10);
     }
 
     // link(970, 882);
@@ -201,11 +204,14 @@ function drawCity(cityIndex) {
     ellipse(screenPos.x, screenPos.y, 10);
 }
 
-function drawLabel(labelText, screenPos, side, withPoint) {
+function drawLabel(labelText, screenPos, side, withPoint, background) {
     side = side || "right";
 
     if (withPoint === undefined) {
         withPoint = true;
+    }
+    if (background === undefined) {
+        background = true;
     }
 
     if (withPoint) {
@@ -221,25 +227,26 @@ function drawLabel(labelText, screenPos, side, withPoint) {
     const xOffset = 15;
     const textHeight = textAscent() + textDescent();
 
-    fill("white");
-
-    if (side === "right") {
-        rect(
-            screenPos.x + xOffset,
-            screenPos.y - (textAscent() / 2) - padding,
-            textWidth(labelText) + padding * 2,
-            textHeight + padding,
-            10
-        );
-    }
-    if (side === "left") {
-        rect(
-            screenPos.x - xOffset - padding * 2 - textWidth(labelText),
-            screenPos.y - (textAscent() / 2) - padding,
-            textWidth(labelText) + padding * 2,
-            textHeight + padding,
-            10
-        );
+    if (background) {
+        fill("white");
+        if (side === "right") {
+            rect(
+                screenPos.x + xOffset,
+                screenPos.y - (textAscent() / 2) - padding,
+                textWidth(labelText) + padding * 2,
+                textHeight + padding,
+                10
+            );
+        }
+        if (side === "left") {
+            rect(
+                screenPos.x - xOffset - padding * 2 - textWidth(labelText),
+                screenPos.y - (textAscent() / 2) - padding,
+                textWidth(labelText) + padding * 2,
+                textHeight + padding,
+                10
+            );
+        }
     }
 
     noStroke();
