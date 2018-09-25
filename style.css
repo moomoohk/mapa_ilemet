@@ -1,9 +1,17 @@
-#title {
-  margin: 0;
-  padding-top: 10px;
-  padding-bottom: 10px;
+#title_container {
   border-bottom: 2px solid darkgrey;
   text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#title {
+  margin: 0;
+  margin-bottom: 5px;
+}
+
+#subtitle {
+  font-size: 10px;
 }
 
 #city_name_header, #result_header {
