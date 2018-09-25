@@ -53,6 +53,7 @@ function getPositionOnScreen(longitude, latitude){
 
 function preload() {
     mapImage = loadImage("map.png");
+
     // loadXMLFromFile();
     loadXMLFromURL();
 }
