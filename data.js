@@ -6,7 +6,7 @@ let cities = [];
 
 
 function loadXMLFromURL() {
-    xmlData = loadXML("http://cors-anywhere.herokuapp.com/" + xmlDataURL);
+    xmlData = loadXML("https://cors-anywhere.herokuapp.com/" + xmlDataURL);
 }
 
 function loadXMLFromFile() {
