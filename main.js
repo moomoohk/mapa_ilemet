@@ -32,6 +32,10 @@ let mapImage;
 
 let drawAllCities = false;
 
+let state;
+
+const distanceScale = 8;
+
 function getPositionOnScreen(longitude, latitude){
     // use offsets
     longitude -= MapBounds.W;
@@ -61,9 +65,17 @@ function setup() {
 
     constructObjects();
 
-    document.querySelector("#app").style.display = "block";
+    select("#app").style("display", "block");
+
+    state = new State();
+    state.generateCity();
+
+    select("#next").mouseReleased((_) => state.reset());
 
     // mapImage.resize(0, mapImage.height / 5);
+    controls.view.zoom = 0.1;
+    controls.view.x = canvas.width / 2 - (mapImage.width * controls.view.zoom) / 2;
+    controls.view.y = canvas.height / 2- (mapImage.height * controls.view.zoom) / 2;
 }
 
 function windowResized() {
@@ -103,7 +115,61 @@ function draw() {
             }
         }
     }
-    // line(mouseX, mouseY, p.x, p.y);
+
+    if (state.mark) {
+        let screenPos = getPositionOnScreen(state.mark.x, state.mark.y);
+
+        fill("green");
+        strokeWeight(2);
+        stroke("black");
+        line(state.mark.x - 10, state.mark.y - 10, state.mark.x + 10, state.mark.y + 10);
+        line(state.mark.x - 10, state.mark.y + 10, state.mark.x + 10, state.mark.y - 10);
+        // ellipse(state.mark.x, state.mark.y, 10);
+    }
+
+    if (state.reveal) {
+        let screenPos = getPositionOnScreen(cities[state.cityIndex].wgs84.x, cities[state.cityIndex].wgs84.y);
+
+        let distance = dist(state.reveal.x, state.reveal.y, screenPos.x, screenPos.y);
+
+        strokeWeight(2);
+        stroke("black");
+        line(state.reveal.x, state.reveal.y, screenPos.x, screenPos.y);
+
+        drawCity(state.cityIndex);
+        drawLabel(state.cityIndex, screenPos);
+
+        push();
+        translate((state.reveal.x + screenPos.x) / 2, (state.reveal.y + screenPos.y) / 2);
+        rotate(atan2(screenPos.y - state.reveal.y, screenPos.x - state.reveal.x));
+        text(nfc(distance * distanceScale, 1) + "km", 0, -5);
+        pop();
+    }
+
+    // link(970, 882);
+    // link(882, 932);
+    // link(932, 970);
+    //
+    // drawCity(970);
+    // drawCity(882);
+    // drawCity(932);
+}
+
+function link(city1, city2) {
+    let city1Pos = getPositionOnScreen(cities[city1].wgs84.x, cities[city1].wgs84.y);
+    let city2Pos = getPositionOnScreen(cities[city2].wgs84.x, cities[city2].wgs84.y);
+
+    let distance = dist(city1Pos.x, city1Pos.y, city2Pos.x, city2Pos.y);
+
+    strokeWeight(2);
+    stroke("black");
+    line(city1Pos.x, city1Pos.y, city2Pos.x, city2Pos.y);
+
+    push();
+    translate((city1Pos.x + city2Pos.x) / 2, (city1Pos.y + city2Pos.y) / 2);
+    rotate(atan2(city2Pos.y - city1Pos.y, city2Pos.x - city1Pos.x));
+    text(nfc(distance, 1), 0, -5);
+    pop();
 }
 
 function drawCity(cityIndex) {
@@ -129,31 +195,56 @@ function drawLabel(cityIndex, screenPos) {
     const padding = 5;
     const xOffset = 15;
     const textHeight = textAscent() + textDescent();
+    const labelText = city.hebrewName;
 
     fill("white");
     rect(
         screenPos.x + xOffset,
         screenPos.y - (textAscent() / 2) - padding,
-        textWidth(city.englishName) + padding * 2,
+        textWidth(labelText) + padding * 2,
         textHeight + padding,
         10
     );
 
     noStroke();
     fill("black");
-    text(city.englishName, screenPos.x + xOffset + padding, screenPos.y + (textAscent() / 2));
+    text(labelText, screenPos.x + xOffset + padding, screenPos.y + (textAscent() / 2));
 }
 
 function mousePressed(event) {
+    if (event.target !== select("canvas").elt) {
+        return;
+    }
+
     Controls.move(controls).mousePressed(event);
+
+    const mouseCoords = createVector(
+        (mouseX - controls.view.x) / controls.view.zoom,
+        (mouseY - controls.view.y) / controls.view.zoom
+    );
+
+    if (state.mark) {
+        if (dist(state.mark.x, state.mark.y, mouseCoords.x, mouseCoords.y) < 10) {
+            state.guess(mouseCoords);
+            return;
+        }
+    }
+
+    if (!state.reveal) {
+        state.mark = mouseCoords;
+    }
 }
 
 function mouseDragged(event) {
-    Controls.move(controls).mouseDragged(event);
+    if (event.target === select("canvas").elt) {
+        Controls.move(controls).mouseDragged(event);
+    }
 }
 
 function mouseReleased() {
-    Controls.move(controls).mouseReleased();
+    if (event.target === select("canvas").elt) {
+        Controls.move(controls).mouseReleased();
+    }
 }
 
 function mouseWheel() {

@@ -1,0 +1,45 @@
+#title {
+  margin: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid darkgrey;
+  text-align: center;
+}
+
+#city_name_header, #result_header {
+  margin: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#city_name {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 50px;
+}
+
+#app {
+  width: 100%;
+  overflow: hidden;
+  display: none;
+}
+
+#sidebar {
+  box-sizing: border-box;
+  border-left: 2px solid darkgray;
+  width: 300px;
+  height: 100%;
+  background-color: ghostwhite;
+  float: right;
+}
+
+#result {
+  display: none;
+  margin-top: 5px;
+  border-top: 2px solid darkgray;
+}
+
+#distance {
+  display: block;
+}

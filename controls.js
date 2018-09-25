@@ -60,18 +60,15 @@ class Controls {
             let zoom = direction * factor;
 
             const maxZoom = 3;
-            const minZoom = 0.3;
-            // constrain(zoomSettings.factor, 0.33, 9.00);
-            // this.sensitivity = 0.005;
-
+            const minZoom = 0.1;
 
             const wx = (x - controls.view.x) / (width * controls.view.zoom);
             const wy = (y - controls.view.y) / (height * controls.view.zoom);
 
-            if (controls.view.zoom + zoom > maxZoom) {
+            if (controls.view.zoom + zoom < minZoom) {
                 return;
             }
-            if (controls.view.zoom + zoom < minZoom) {
+            if (controls.view.zoom + zoom > maxZoom) {
                 return;
             }
 
