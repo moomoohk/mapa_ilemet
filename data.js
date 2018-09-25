@@ -18,7 +18,6 @@ function constructObjects() {
         return;
     }
 
-    console.log("construct");
     let records =
         xmlData.getChild("WorkspaceData").getChild("DatasetData").getChild("Data").getChild("Records").getChildren();
     console.log("Loaded", records.length, "records");

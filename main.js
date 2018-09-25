@@ -137,13 +137,32 @@ function draw() {
         line(state.reveal.x, state.reveal.y, screenPos.x, screenPos.y);
 
         drawCity(state.cityIndex);
-        drawLabel(state.cityIndex, screenPos);
+        if (state.reveal.x < screenPos.x) {
+            drawLabel(cities[state.cityIndex].hebrewName, screenPos, "right");
+        } else {
+            drawLabel(cities[state.cityIndex].hebrewName, screenPos, "left");
+        }
 
-        push();
-        translate((state.reveal.x + screenPos.x) / 2, (state.reveal.y + screenPos.y) / 2);
-        rotate(atan2(screenPos.y - state.reveal.y, screenPos.x - state.reveal.x));
-        text(nfc(distance * distanceScale, 1) + "km", 0, -5);
-        pop();
+        if (state.distance > 150) {
+            push();
+            translate((state.reveal.x + screenPos.x) / 2, (state.reveal.y + screenPos.y) / 2);
+
+            if (state.reveal.x > screenPos.x) {
+                rotate(atan2(state.reveal.y - screenPos.y, state.reveal.x - screenPos.x));
+            } else {
+                rotate(atan2(screenPos.y - state.reveal.y, screenPos.x - state.reveal.x));
+            }
+
+            text(nfc(distance / distanceScale, 1) + "km", 0, -5);
+            pop();
+        } else {
+            const distanceLabelPos = createVector(screenPos.x, screenPos.y + 50);
+            if (state.reveal.x < screenPos.x) {
+                drawLabel(nfc(distance / distanceScale, 1) + "km", distanceLabelPos, "right", false);
+            } else {
+                drawLabel(nfc(distance / distanceScale, 1) + "km", distanceLabelPos, "left", false);
+            }
+        }
     }
 
     // link(970, 882);
@@ -182,33 +201,56 @@ function drawCity(cityIndex) {
     ellipse(screenPos.x, screenPos.y, 10);
 }
 
-function drawLabel(cityIndex, screenPos) {
-    let city = cities[cityIndex];
+function drawLabel(labelText, screenPos, side, withPoint) {
+    side = side || "right";
 
-    fill("red");
+    if (withPoint === undefined) {
+        withPoint = true;
+    }
+
+    if (withPoint) {
+        fill("red");
+        ellipse(screenPos.x, screenPos.y, 15);
+    }
+
     strokeWeight(2);
     stroke("black");
-    ellipse(screenPos.x, screenPos.y, 15);
-
     textSize(30);
 
     const padding = 5;
     const xOffset = 15;
     const textHeight = textAscent() + textDescent();
-    const labelText = city.hebrewName;
 
     fill("white");
-    rect(
-        screenPos.x + xOffset,
-        screenPos.y - (textAscent() / 2) - padding,
-        textWidth(labelText) + padding * 2,
-        textHeight + padding,
-        10
-    );
+
+    if (side === "right") {
+        rect(
+            screenPos.x + xOffset,
+            screenPos.y - (textAscent() / 2) - padding,
+            textWidth(labelText) + padding * 2,
+            textHeight + padding,
+            10
+        );
+    }
+    if (side === "left") {
+        rect(
+            screenPos.x - xOffset - padding * 2 - textWidth(labelText),
+            screenPos.y - (textAscent() / 2) - padding,
+            textWidth(labelText) + padding * 2,
+            textHeight + padding,
+            10
+        );
+    }
 
     noStroke();
     fill("black");
-    text(labelText, screenPos.x + xOffset + padding, screenPos.y + (textAscent() / 2));
+
+    if (side === "right") {
+        text(labelText, screenPos.x + xOffset + padding, screenPos.y + (textAscent() / 2));
+    }
+    if (side === "left") {
+        text(labelText, screenPos.x - xOffset - padding - textWidth(labelText), screenPos.y + (textAscent() / 2));
+    }
 }
 
 function mousePressed(event) {

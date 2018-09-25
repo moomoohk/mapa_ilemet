@@ -29,6 +29,6 @@ class State {
         this.distance = dist(state.reveal.x, state.reveal.y, screenPos.x, screenPos.y);
 
         select("#result").style("display", "block");
-        select("#distance").html(nfc(this.distance * distanceScale, 1) + "ק“מ (" + this.distance + ")");
+        select("#distance").html(nfc(this.distance / distanceScale, 1) + "ק“מ");
     }
 }

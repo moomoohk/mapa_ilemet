@@ -17,6 +17,7 @@
   width: 100%;
   text-align: center;
   font-size: 50px;
+  margin-bottom: 10px;
 }
 
 #app {
@@ -32,6 +33,10 @@
   height: 100%;
   background-color: ghostwhite;
   float: right;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  user-select: none;
+  word-wrap: break-word;
 }
 
 #result {
@@ -42,4 +47,5 @@
 
 #distance {
   display: block;
+  user-select: default;
 }
