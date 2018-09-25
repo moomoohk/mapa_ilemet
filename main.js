@@ -28,29 +28,9 @@ class MapBounds {
     }
 }
 
-class Zoom {
-    constructor() {
-        this.factor = 1.00;
-        this.min = 0.33;
-        this.max = 9.00;
-        this.sensitivity = 0.005;
-
-        this.anchor = createVector(0, 0);
-    }
-}
-
-class Point {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-}
-
-let zoomSettings;
-
 let mapImage;
-let mapImageOffset;
-let clickOffset;  // Offset relative to mapImageOffset
+
+let drawAllCities = false;
 
 function getPositionOnScreen(longitude, latitude){
     // use offsets
@@ -63,7 +43,7 @@ function getPositionOnScreen(longitude, latitude){
     let x = int(mapImage.width * (longitude / MapBounds.mapWidth));
     let y = int(mapImage.height * (latitude / MapBounds.mapHeight));
 
-    return new Point(mapImageOffset.x + x, mapImageOffset.y + y);
+    return createVector(x, y);
     // return new Point((mapImageOffset.x + x / mapScale * zoom), (mapImageOffset.y + y / mapScale * zoom));
 }
 
@@ -75,14 +55,15 @@ function preload() {
 
 function setup() {
     let canvas = createCanvas(windowWidth - 300, windowHeight);
+    canvas.mouseWheel(e => Controls.zoom(controls).worldZoom(e));
+
     canvas.parent("map_image");
 
     constructObjects();
 
     document.querySelector("#app").style.display = "block";
 
-    mapImageOffset = createVector(0, 0);
-    zoomSettings = new Zoom();
+    // mapImage.resize(0, mapImage.height / 5);
 }
 
 function windowResized() {
@@ -92,45 +73,36 @@ function windowResized() {
 function draw() {
     background("white");
 
-    // translate(zoomSettings.anchor.x, zoomSettings.anchor.y);
-    // scale(zoomSettings.factor);
-    // translate(-zoomSettings.anchor.x, -zoomSettings.anchor.y);
+    translate(controls.view.x, controls.view.y);
 
+    scale(controls.view.zoom);
 
-    imageMode(CENTER);
     image(
         mapImage,
         0,
         0,
-        mapImage.width / 2,
-        mapImage.height / 2,
+        mapImage.width,
+        mapImage.height,
         0, 0);
 
-    // image(
-    //     mapImage,
-    //     mapImageOffset.x /*- (mapImage.width / 2)*/,
-    //     mapImageOffset.y /*- (mapImage.height / 2)*/,
-    //     (mapImage.width / mapScale) * zoom,
-    //     (mapImage.height / mapScale) * zoom,
-    //     0, 0);
+    if (drawAllCities) {
+        for (let cityIndex in cities) {
+            drawCity(cityIndex);
+        }
 
-    // Jerusalem
-    // let screenPos = drawCity(895);
+        for (let cityIndex in cities) {
+            let city = cities[cityIndex];
+            let screenPos = getPositionOnScreen(city.wgs84.x, city.wgs84.y);
 
-    for (let cityIndex in cities) {
-        drawCity(cityIndex);
-    }
-
-    for (let cityIndex in cities) {
-        let city = cities[cityIndex];
-        let screenPos = getPositionOnScreen(city.wgs84.x, city.wgs84.y);
-
-        if (Math.hypot(mouseX - screenPos.x, mouseY - screenPos.y) <= 10) {
-            drawLabel(cityIndex, screenPos);
-            break;
+            if (Math.hypot(
+                    (mouseX - controls.view.x) / controls.view.zoom - screenPos.x,
+                    (mouseY - controls.view.y) / controls.view.zoom - screenPos.y
+                ) <= 10) {
+                drawLabel(cityIndex, screenPos);
+                break;
+            }
         }
     }
-
     // line(mouseX, mouseY, p.x, p.y);
 }
 
@@ -173,23 +145,23 @@ function drawLabel(cityIndex, screenPos) {
 }
 
 function mousePressed(event) {
-    clickOffset = createVector(mapImageOffset.x - mouseX, mapImageOffset.y - mouseY);
+    Controls.move(controls).mousePressed(event);
 }
 
-function mouseDragged() {
-    if (mouseX > 0) {
-        let m = createVector(mouseX, mouseY);
-        // mapImageOffset.set(m).add(clickOffset);
-        translate(m.add(clickOffset));
-    }
+function mouseDragged(event) {
+    Controls.move(controls).mouseDragged(event);
+}
+
+function mouseReleased() {
+    Controls.move(controls).mouseReleased();
 }
 
 function mouseWheel() {
-    if (mouseX > 0) {
-        zoomSettings.anchor = createVector(mouseX, mouseY);
-        zoomSettings.factor += zoomSettings.sensitivity * -event.delta;
-        zoomSettings.factor = constrain(zoomSettings.factor, zoomSettings.min, zoomSettings.max);
-
-        return false;
-    }
+    // if (mouseX > 0) {
+    //     zoomSettings.anchor = createVector(mouseX, mouseY);
+    //     zoomSettings.factor += zoomSettings.sensitivity * -event.delta;
+    //     zoomSettings.factor = constrain(zoomSettings.factor, zoomSettings.min, zoomSettings.max);
+    //
+    //     return false;
+    // }
 }
