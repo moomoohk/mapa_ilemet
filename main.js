@@ -169,7 +169,7 @@ function draw() {
             if (state.reveal.x < screenPos.x) {
                 labelDrawOptions.labelSide = "right";
             } else {
-                labelDrawOptions.labelSide = "right";
+                labelDrawOptions.labelSide = "left";
             }
             drawLabel(distanceText, distanceLabelPos, labelDrawOptions);
         }
