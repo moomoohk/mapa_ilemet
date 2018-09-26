@@ -15,12 +15,6 @@
     <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.4.3/proj4-src.js"></script>
     <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.0.0-alpha0/date_fns.js"></script>
 
-    <script language="javascript" type="text/javascript" src="main.js"></script>
-    <script language="javascript" type="text/javascript" src="data.js"></script>
-    <script language="javascript" type="text/javascript" src="city.js"></script>
-    <script language="javascript" type="text/javascript" src="controls.js"></script>
-    <script language="javascript" type="text/javascript" src="state.js"></script>
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -49,5 +43,38 @@
         </div>
         <div id="map_image"></div>
     </div>
+
+    <script type="text/javascript">
+        function globalError(errorMsg, url, lineNumber) {
+            if (arguments.length === 1) {
+                url = "unknown";
+                lineNumber = "unknown";
+            }
+
+            const star = document.querySelector("#star");
+            star.style.animationPlayState = "paused";
+            star.parentNode.style.zIndex = -1;
+
+            const p = document.createElement("p");
+            p.style.backgroundColor = "red";
+            p.innerHTML = "Error loading data!";
+
+            const div = document.createElement("div");
+            div.style.backgroundColor = "red";
+            div.innerText = "At " + url + " line " + lineNumber + ":\n\t" + errorMsg;
+
+            const body = document.querySelector("body");
+            body.appendChild(p);
+            body.appendChild(div);
+        }
+
+        window.onerror = globalError;
+    </script>
+
+    <script language="javascript" type="text/javascript" src="main.js"></script>
+    <script language="javascript" type="text/javascript" src="data.js"></script>
+    <script language="javascript" type="text/javascript" src="city.js"></script>
+    <script language="javascript" type="text/javascript" src="controls.js"></script>
+    <script language="javascript" type="text/javascript" src="state.js"></script>
 </body>
 </html>
