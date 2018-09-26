@@ -63,9 +63,9 @@ class State {
     static _setRoundTime(roundTime) {
         const now = Date.now();
 
-        const seconds = dateFns.differenceInSeconds(now, roundTime);
-        const minutes = dateFns.differenceInMinutes(now, roundTime);
-        const hours = dateFns.differenceInHours(now, roundTime);
+        const seconds = dateFns.differenceInSeconds(now, roundTime) % 60;
+        const minutes = dateFns.differenceInMinutes(now, roundTime) % 60;
+        const hours = dateFns.differenceInHours(now, roundTime) % 24;
         const days = dateFns.differenceInDays(now, roundTime);
 
         let output = "לקח לך ";
