@@ -99,7 +99,13 @@ function draw() {
 
     if (drawAllCities) {
         for (let cityIndex in cities) {
-            drawCity(cityIndex);
+            let city = cities[cityIndex];
+            let screenPos = getPositionOnScreen(city.wgs84.x, city.wgs84.y);
+
+            fill("red");
+            strokeWeight(2);
+            stroke("black");
+            ellipse(screenPos.x, screenPos.y, 10);
         }
 
         for (let cityIndex in cities) {
@@ -110,7 +116,7 @@ function draw() {
                     (mouseX - controls.view.x) / controls.view.zoom - screenPos.x,
                     (mouseY - controls.view.y) / controls.view.zoom - screenPos.y
                 ) <= 10) {
-                drawLabel(cityIndex, screenPos);
+                drawLabel(city.hebrewName, screenPos);
                 break;
             }
         }
@@ -125,12 +131,18 @@ function draw() {
         stroke("black");
         line(state.reveal.x, state.reveal.y, screenPos.x, screenPos.y);
 
-        drawCity(state.cityIndex);
+        strokeWeight(5);
+        stroke("green");
+        line(state.reveal.x - 10, state.reveal.y - 10, state.reveal.x + 10, state.reveal.y + 10);
+        line(state.reveal.x - 10, state.reveal.y + 10, state.reveal.x + 10, state.reveal.y - 10);
+
+        let labelDrawOptions = new LabelDrawOptions();
         if (state.reveal.x < screenPos.x) {
-            drawLabel(cities[state.cityIndex].hebrewName, screenPos, "right");
+            labelDrawOptions.labelSide = "right";
         } else {
-            drawLabel(cities[state.cityIndex].hebrewName, screenPos, "left");
+            labelDrawOptions.labelSide = "left";
         }
+        drawLabel(cities[state.cityIndex].hebrewName, screenPos, labelDrawOptions);
 
         const distanceText = nfc(distance / distanceScale, 1) + "km";
 
@@ -150,23 +162,29 @@ function draw() {
             pop();
         } else {
             const distanceLabelPos = createVector(screenPos.x, screenPos.y + 50);
+
+            let labelDrawOptions = new LabelDrawOptions();
+            labelDrawOptions.point = false;
+            labelDrawOptions.labelBackground = false;
             if (state.reveal.x < screenPos.x) {
-                drawLabel(distanceText, distanceLabelPos, "right", false, false);
+                labelDrawOptions.labelSide = "right";
             } else {
-                drawLabel(distanceText, distanceLabelPos, "left", false, false);
+                labelDrawOptions.labelSide = "right";
             }
+            drawLabel(distanceText, distanceLabelPos, labelDrawOptions);
         }
     }
 
-    if (state.mark) {
-        let screenPos = getPositionOnScreen(state.mark.x, state.mark.y);
-
-        fill("green");
+    if (state.mark  && !state.reveal) {
+        noFill();
         strokeWeight(5);
         stroke("green");
-        line(state.mark.x - 10, state.mark.y - 10, state.mark.x + 10, state.mark.y + 10);
-        line(state.mark.x - 10, state.mark.y + 10, state.mark.x + 10, state.mark.y - 10);
-        // ellipse(state.mark.x, state.mark.y, 10);
+        // ellipse(state.mark.x, state.mark.y, 30);
+
+        let labelDrawOptions = new LabelDrawOptions();
+        labelDrawOptions.labelSide = "left";
+        labelDrawOptions.pointFillColor = "green";
+        drawLabel("לחץ שוב לדקור", state.mark, labelDrawOptions);
     }
 
     // link(970, 882);
@@ -195,68 +213,85 @@ function link(city1, city2) {
     pop();
 }
 
-function drawCity(cityIndex) {
-    let city = cities[cityIndex];
+class LabelDrawOptions {
+    constructor() {
+        this.point = true;
+        this.pointSize = 15;
+        this.pointFill = true;
+        this.pointFillColor = "red";
+        this.pointStroke = true;
+        this.pointStrokeColor = "black";
+        this.pointStrokeWeight = 2;
 
-    let screenPos = getPositionOnScreen(city.wgs84.x, city.wgs84.y);
-
-    fill("red");
-    noStroke();
-    ellipse(screenPos.x, screenPos.y, 10);
+        this.labelSide = "right";
+        this.labelBackground = true;
+        this.labelBackgroundColor = "white";
+        this.labelOffset = this.pointSize;
+        this.labelTextColor = "black";
+        this.labelTextSize = 30;
+        this.labelPadding = 5;
+        this.labelCornerRounding = 10;
+    }
 }
 
-function drawLabel(labelText, screenPos, side, withPoint, background) {
-    side = side || "right";
+function drawLabel(labelText, screenPos, drawOptions) {
+    drawOptions = drawOptions || new LabelDrawOptions();
 
-    if (withPoint === undefined) {
-        withPoint = true;
-    }
-    if (background === undefined) {
-        background = true;
-    }
 
-    if (withPoint) {
-        fill("red");
-        ellipse(screenPos.x, screenPos.y, 15);
+    if (drawOptions.point) {
+        if (drawOptions.pointStroke) {
+            stroke(drawOptions.pointStrokeColor);
+            strokeWeight(drawOptions.pointStrokeWeight);
+        } else {
+            noStroke();
+        }
+
+        if (drawOptions.pointFill) {
+            fill(drawOptions.pointFillColor);
+        } else {
+            noFill();
+        }
+
+        ellipse(screenPos.x, screenPos.y, drawOptions.pointSize);
     }
 
     strokeWeight(2);
-    stroke("black");
-    textSize(30);
+    stroke(drawOptions.labelTextColor);
+    textSize(drawOptions.labelTextSize);
 
-    const padding = 5;
-    const xOffset = 15;
+    const padding = drawOptions.labelPadding;
+    const xOffset = drawOptions.labelOffset;
     const textHeight = textAscent() + textDescent();
 
-    if (background) {
-        fill("white");
-        if (side === "right") {
+    if (drawOptions.labelBackground) {
+        fill(drawOptions.labelBackgroundColor);
+        if (drawOptions.labelSide === "right") {
             rect(
                 screenPos.x + xOffset,
                 screenPos.y - (textAscent() / 2) - padding,
                 textWidth(labelText) + padding * 2,
                 textHeight + padding,
-                10
+                drawOptions.labelCornerRounding
             );
         }
-        if (side === "left") {
+        if (drawOptions.labelSide === "left") {
             rect(
                 screenPos.x - xOffset - padding * 2 - textWidth(labelText),
                 screenPos.y - (textAscent() / 2) - padding,
                 textWidth(labelText) + padding * 2,
                 textHeight + padding,
-                10
+                drawOptions.labelCornerRounding
             );
         }
     }
 
     noStroke();
-    fill("black");
+    fill(drawOptions.labelTextColor);
 
-    if (side === "right") {
+    if (drawOptions.labelSide === "right") {
         text(labelText, screenPos.x + xOffset + padding, screenPos.y + (textAscent() / 2));
     }
-    if (side === "left") {
+    if (drawOptions.labelSide === "left") {
         text(labelText, screenPos.x - xOffset - padding - textWidth(labelText), screenPos.y + (textAscent() / 2));
     }
 }
@@ -273,8 +308,8 @@ function mousePressed(event) {
         (mouseY - controls.view.y) / controls.view.zoom
     );
 
-    if (state.mark) {
-        if (dist(state.mark.x, state.mark.y, mouseCoords.x, mouseCoords.y) < 10) {
+    if (state.mark && !state.reveal) {
+        if (dist(state.mark.x, state.mark.y, mouseCoords.x, mouseCoords.y) < 35) {
             state.guess(mouseCoords);
             return;
         }

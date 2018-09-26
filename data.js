@@ -36,6 +36,7 @@ function constructObjects() {
         let hebrewName = values.getChild(4).content;
         let type = values.getChild(7).content;
         let englishName = values.getChild(8).content;
-        cities.push(new City(englishName, hebrewName, x, y, type));
+        let population = values.getChild(5).content;
+        cities.push(new City(englishName, hebrewName, x, y, type, population));
     }
 }

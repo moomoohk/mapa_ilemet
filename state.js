@@ -5,6 +5,7 @@ class State {
         this.reveal = null;
         this.mark = null;
         this.distance = null;
+        this.roundStartTime = Date.now();
     }
 
     generateCity() {
@@ -17,6 +18,7 @@ class State {
         this.reveal = null;
         this.mark = null;
         this.distance = null;
+        this.roundStartTime = Date.now();
         select("#result_container").style("display", "none");
 
         this.generateCity();
@@ -31,10 +33,14 @@ class State {
         select("#result_container").style("display", "block");
         select("#distance").html(nfc(this.distance / distanceScale, 1) + "ק“מ");
 
-        this._setResultMessage(this.distance / distanceScale);
+        State._setResultMessage(this.distance / distanceScale);
+
+        // const roundTime =  moment(this.roundStartTime).fromNow(true);
+
+        State._setRoundTime(this.roundStartTime);
     }
 
-    _setResultMessage(distance) {
+    static _setResultMessage(distance) {
         const messages = {
             0: ["מדהים!", "קלעת בול!", "מטורף!", "ממש מלך הארץ"],
             5: ["קרוב", "כמעט", "באיזור", "בשכונה"],
@@ -52,5 +58,52 @@ class State {
         }
 
         select("#message").html(message);
+    }
+
+    static _setRoundTime(roundTime) {
+        const now = Date.now();
+
+        const seconds = dateFns.differenceInSeconds(now, roundTime);
+        const minutes = dateFns.differenceInMinutes(now, roundTime);
+        const hours = dateFns.differenceInHours(now, roundTime);
+        const days = dateFns.differenceInDays(now, roundTime);
+
+        let output = "לקח לך ";
+
+        if (days > 0) {
+            if (days === 1) {
+                output += "יום אחד ";
+            } else if (days === 2) {
+                output += "יומיים ";
+            } else {
+                output += days + " ימים ";
+            }
+        }
+
+        if (hours > 0) {
+            if (hours === 1) {
+                output += "שעה אחת ";
+            } else if (hours === 2) {
+                output += "שעתיים ";
+            } else {
+                output += hours + " שעות ";
+            }
+        }
+
+        if (minutes > 0) {
+            if (minutes === 1) {
+                output += "דקה אחת ";
+            } else {
+                output += minutes + " דקות ";
+            }
+        }
+
+        if (seconds === 1) {
+            output += "שנייה אחת";
+        } else {
+            output += seconds + " שניות";
+        }
+
+        select("#time").html(output);
     }
 }

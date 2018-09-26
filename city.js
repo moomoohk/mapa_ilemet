@@ -10,9 +10,10 @@ class City {
      * @param y Latitude
      * @param type
      */
-    constructor(englishName, hebrewName, x, y, type) {
+    constructor(englishName, hebrewName, x, y, type, population) {
         this.englishName = englishName;
         this.hebrewName = hebrewName;
+        this.population = population;
 
         this.wgs84 = proj4(
             "ITM",

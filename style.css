@@ -3,8 +3,8 @@
   top: 50%;
   left: 50%;
   width: 260px;
-  height: 350px;
-  margin: -130px 0 0 -175px;
+  height: 380px;
+  margin: -190px 0 0 -175px;
 }
 
 #loading_title {
@@ -38,6 +38,14 @@
   padding-bottom: 10px;
   border-bottom: 2px solid darkgrey;
   text-align: center;
+}
+
+#title {
+  margin: 0 0 5px;
+}
+
+#subtitle {
+  font-size: 10px;
 }
 
 #city_name_header, #result_header {
@@ -95,7 +103,8 @@
 }
 
 #message {
-  margin-top: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
   display: block;
   width: 100%;
   text-align: center;
