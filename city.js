@@ -9,6 +9,7 @@ class City {
      * @param x Longitude
      * @param y Latitude
      * @param type
+     * @param population
      */
     constructor(englishName, hebrewName, x, y, type, population) {
         this.englishName = englishName;

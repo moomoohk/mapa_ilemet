@@ -11,10 +11,7 @@ function loadXMLFromURL() {
     }
 
     function loadError(e) {
-        select("#star").style("animation-play-state", "paused");
-
-        createP("Error loading data!").style("background-color", "red");
-        createDiv(e).style("background-color", "red");
+        globalError(e);
     }
 
     xmlData = loadXML("https://cors-anywhere.herokuapp.com/" + xmlDataURL, loadSuccess, loadError);
